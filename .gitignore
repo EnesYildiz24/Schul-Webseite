@@ -1,0 +1,26 @@
+# Ignore typical output directories
+dist
+target
+out
+.webpack
+# Node.js specific
+node_modules
+# Cache directories
+.npm
+.eslintcache
+.tsbuildinfo
+# macos specific files
+.DS_Store
+# test output
+junit.xml
+coverage
+# mongodb
+mongodata
+mongodatatest
+# Submission file(s) and other sup files
+abgabe*.zip
+*.zip
+# PDF Files (in case Task description is moved in to project)
+*.pdf
+# ignore log files
+*.log

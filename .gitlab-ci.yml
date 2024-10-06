@@ -1,0 +1,21 @@
+image: node:20
+
+stages:
+  - test
+
+javascript:
+  stage: test
+  variables:
+    # BHT's Gitlab CI only supports MongoDB up to 7.0.3
+    MONGOMS_VERSION: "7.0.3"
+    NODE_OPTIONS: "--max-old-space-size=4096"
+  script:
+    # ci is like install, but faster (and we need a synchronized package-lock.json)
+    - npm ci
+    # - npm run build # we use ts-jest, no need for compilation
+    - npm test
+  coverage: '/All files\s*|\s+([\d\.]+)\s*\|.*/'
+  artifacts:
+    reports:
+      junit:
+        - junit.xml

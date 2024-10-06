@@ -1,0 +1,11 @@
+{ // Konfiguration von TypeScript für die Tests, die mit ts-jest ausgeführt werden.
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "noEmit": true
+  },
+  "include": [
+    "../src/**/*",
+    "./**/*"
+  ]
+}

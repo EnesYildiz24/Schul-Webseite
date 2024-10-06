@@ -1,0 +1,18 @@
+{
+    "typescript.preferences.importModuleSpecifier": "relative",
+    "jest.runMode": {
+        "type": "on-save",
+        "testFileOnly": true,
+        "deferred": true
+    },
+    "jest.outputConfig": {
+        "revealOn": "demand",
+        "revealWithFocus": "none",
+        "clearOnRun": "none"
+    },
+    // "testing.openTesting": "neverOpen",
+    "github.copilot.editor.enableAutoCompletions": false,
+    "github.copilot.enable": {
+        "*": false
+    }
+}

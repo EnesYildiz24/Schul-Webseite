@@ -1,0 +1,62 @@
+@host = http://localhost:3000
+
+# ----------------------------------------------------
+# Die folgenden Tests setzen voraus, dass alle Aufrufe in
+#
+#             1_createDemo.http
+#
+# erfolgreich ausgeführt wurden. 2_updateDemo.http kann ausgeführt worden sein, das ist hier egal.
+#
+# Die folgenden Positivtests löschen nacheinander die bestehenden Daten.
+#
+# Wir gehen dabei folgende Schritte durch:
+#
+# 1. Abfragen aller Profs, sollte einen Prof anzeigen
+# 2. Abfragen aller Gebiete, sollte ein Gebiet anzeigen
+# 3. Abfragen des Gebiet-Themas, sollte ein Thema anzeigen
+# 4. Löschen des Themas
+# 5. Abfragen des Gebiet-Themas, sollte keine Themen mehr anzeigen
+# 6. Löschen des Gebiets
+# 7. Abfragen aller Gebiete, sollte keine Gebiete mehr anzeigen
+# 8. Löschen des Profs
+# 9. Abfragen aller Profs, sollte keine Profs mehr anzeigen
+
+###
+# @name getProf
+GET {{host}}/api/prof/alle
+
+###
+@profId = {{getProf.response.body.$[0].id}}
+###
+# @name getGebiete
+GET {{host}}/api/gebiet/alle
+
+###
+@gebietId = {{getGebiete.response.body.$[0].id}}
+###
+# @name getThemen
+GET {{host}}/api/gebiet/{{gebietId}}/themen
+
+###
+@themaId = {{getThemen.response.body.$[0].id}}
+###
+DELETE {{host}}/api/thema/{{themaId}}
+
+###
+GET {{host}}/api/gebiet/{{gebietId}}/themen
+
+###
+DELETE {{host}}/api/gebiet/{{gebietId}}
+
+###
+GET {{host}}/api/gebiet/alle
+
+###
+GET {{host}}/api/prof/alle
+
+###
+DELETE {{host}}/api/prof/{{profId}}
+
+###
+GET {{host}}/api/prof/alle
+

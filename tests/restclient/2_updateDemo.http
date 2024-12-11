@@ -1,0 +1,72 @@
+@host = http://localhost:3000
+
+# ----------------------------------------------------
+# Die folgenden Tests setzen voraus, dass alle Aufrufe in
+#
+#             1_createDemo.http
+#
+# erfolgreich ausgeführt wurden (und 3_deleteDemo.http nicht ausgeführt wurde).
+#
+# Die folgenden Positivtests ändern die bestehenden Daten.
+#
+# Wir gehen dabei folgende Schritte durch:
+#
+# 1. Abfragen aller Profs (zeigt dann den erzeugen "Moriarty")
+# 2. Ändern des Names in "Napoleon of crime"
+# 3. Abfragen aller Profs (zeigt dann "Napoleon of crime")
+# 4. Abfragen aller Gebiete (zeigt eins "KI")
+# 5. Ändern des Namens im Gebiet auf "Künstliche Intelligenz"
+# 6. Abfragen aller Gebiete
+# 8. Abfragen des Gebiets mit dem Thema (zeigt Thema)
+# 5. Ändern des Titels
+# 8. Abfragen des Gebiets mit dem Thema (zeigt nun Thema "Textzusammenfassung")
+#
+###
+# @name getProf
+GET {{host}}/api/prof/alle
+
+###
+@profId = {{getProf.response.body.$[0].id}}
+###
+PUT {{host}}/api/prof/{{profId}}
+Content-Type: application/json
+
+{ "id":"{{profId}}", "name": "Napoleon of crime", "campusID": "noc", "admin": "false" }
+
+###
+GET {{host}}/api/prof/alle
+
+###
+# @name getGebiete
+GET {{host}}/api/gebiet/alle
+
+###
+@gebietId = {{getGebiete.response.body.$[0].id}}
+@gebietName = {{getGebiete.response.body.$[0].name}}
+###
+PUT {{host}}/api/gebiet/{{gebietId}}
+Content-Type: application/json
+
+{ "id": "{{gebietId}}", "name": "{{gebietName}}", "verwalter": "{{profId}}", "public": true}
+
+###
+GET {{host}}/api/gebiet/alle
+
+###
+# @name getThemen
+GET {{host}}/api/gebiet/{{gebietId}}/themen
+
+###
+@themaId = {{getThemen.response.body.$[0].id}}
+###
+
+PUT {{host}}/api/thema/{{themaId}}
+Content-Type: application/json
+
+{ "id":"{{themaId}}", "titel": "Wecker-Web-App", "beschreibung": "Der Wecker soll Detektive nicht wecken.", "abschluss": "bsc", "betreuer": "{{profId}}" , "gebiet": "{{gebietId}}"}
+
+###
+GET {{host}}/api/gebiet/{{gebietId}}/themen
+
+###
+

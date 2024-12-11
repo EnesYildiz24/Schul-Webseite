@@ -1,0 +1,67 @@
+@host = http://localhost:3000
+
+# ----------------------------------------------------
+# Positivtests, lassen sich der Reihenfolge nach
+# aufrufen.
+# Wir gehen dabei folgende Schritte durch:
+#
+# 1. Abfragen aller Profs (zeigt nichts an)
+# 2. Erzeugen eines Profs
+# 3. Abfragen aller Profs (zeigt dann den erzeugen Prof)
+# 4. Erzeugen eines Gebiets
+# 5. Abfragen aller Gebiete (zeigt dann das erzeugte Gebiet)
+# 6. Erzeugen eines Themas
+# 7. Abfragen aller Gebiete (zeigt dann die erzeugten Gebiete)
+# 8. Abfragen des Gebiets mit dem Thema (zeigt dann das erzeugte Thema)
+#
+# Wir haben also einen Prof, ein Gebiet und ein Thema erzeugt.
+
+###
+GET {{host}}/api/prof/alle
+
+###
+# @name postedProf
+POST {{host}}/api/prof/
+Content-Type: application/json
+
+{ "name": "Moriarty", "titel": "Prof.", "campusID": "mori", "password": "abcABC123!§$", "admin": false}
+
+###
+@profId = {{postedProf.response.body.$.id}}
+###
+GET {{host}}/api/prof/alle
+
+###
+
+# @name postedGebiet
+POST {{host}}/api/gebiet/
+Content-Type: application/json
+
+{ "name": "Data Science", "public": true, "verwalter": "{{profId}}"}
+
+###
+GET {{host}}/api/gebiet/alle
+
+###
+@gebietId = {{postedGebiet.response.body.$.id}}
+###
+
+GET {{host}}/api/gebiet/{{gebietId}}/themen
+
+###
+
+# @name postedThema
+POST {{host}}/api/thema
+Content-Type: application/json
+
+{ "titel": "Entwicklung einer Wecker-App", "beschreibung": "Der Wecker soll wecken.", "abschluss": "bsc", "betreuer": "{{profId}}" , "gebiet": "{{gebietId}}"}
+
+###
+@themaId = {{postedThema.response.body.$.id}}
+###
+GET {{host}}/api/thema/{{themaId}}
+
+###
+GET {{host}}/api/gebiet/alle
+
+###

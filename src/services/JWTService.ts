@@ -1,5 +1,5 @@
 import { LoginResource } from "../Resources";
-import { JwtPayload, sign, verify } from "jsonwebtoken";
+import { JsonWebTokenError, JwtPayload, sign, verify } from "jsonwebtoken";
 import { login } from "./AuthenticationService";
 
 export async function verifyPasswordAndCreateJWT(
@@ -29,5 +29,32 @@ export async function verifyPasswordAndCreateJWT(
 }
 
 export function verifyJWT(jwtString: string | undefined): LoginResource {
-  throw new Error("Function verifyJWT not implemented");
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new JsonWebTokenError("JWT_SECRET oder JWT_TTL icht gegeben");
+  }
+  if (!jwtString) {
+    throw new JsonWebTokenError("JWT ist nicht definiert");
+  }
+
+  try {
+    const payload = verify(jwtString, secret, {
+      algorithms: ["HS256"],
+    }) as JwtPayload;
+
+    const userId = payload.sub;
+    const role = payload.role;
+    const exp = payload.exp;
+
+    if (!userId || !exp || !role) {
+      throw new JsonWebTokenError("Ungültiges JWT-Payload");
+    }
+    return {
+      id: userId,
+      role: payload.role,
+      exp: exp,
+    } as LoginResource;
+  } catch (err) {
+    throw new JsonWebTokenError(`JWT-Validierung fehlgeschlagen`);
+  }
 }

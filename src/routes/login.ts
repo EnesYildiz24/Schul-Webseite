@@ -29,7 +29,8 @@ loginRouter.post(
     };
     const loginResult = await login(campusID, password);
     if (!loginResult) {
-      return res.status(401).send("Login failed");
+      res.status(401).send("Login failed");
+      return
     }
     const jwtString = sign(
       {

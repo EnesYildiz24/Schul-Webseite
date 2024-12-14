@@ -17,8 +17,8 @@ export async function verifyPasswordAndCreateJWT(
     return undefined;
   }
   const payload: JwtPayload = {
-    sub: logger.id,
-    role: logger.role,
+    sub: logger.id ,
+    role: logger.role as "a" | "u",
   };
   const jwtString = sign(payload, secret, {
     expiresIn: parseInt(ttl, 10),
@@ -43,7 +43,7 @@ export function verifyJWT(jwtString: string | undefined): LoginResource {
     }) as JwtPayload;
 
     const userId = payload.sub;
-    const role = payload.role;
+    const role = payload.role as "a" | "u";
     const exp = payload.exp;
 
     if (!userId || !exp || !role) {

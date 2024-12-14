@@ -3,6 +3,7 @@ import "express-async-errors"; // needs to be imported before routers and other 
 import { themenRouter } from "./routes/thema";
 import { gebietRouter } from "./routes/gebiet";
 import { profRouter } from "./routes/prof";
+import { loginRouter } from "./routes/login";
 
 const app = express();
 
@@ -22,5 +23,6 @@ die anfrage wird dann automatisch in eine JavaScript Objekt umgewandelt sodass m
 app.use("/api/thema", themenRouter);
 app.use("/api/gebiet", gebietRouter);
 app.use("/api/prof", profRouter);
+app.use("/api/login", loginRouter); 
 
 export default app;

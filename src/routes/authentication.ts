@@ -4,7 +4,6 @@ import validator from "validator";
 
 const COOKIE_NAME = process.env.COOKIE_NAME!;
 const SECRET = process.env.JWT_SECRET!;
-const TTL = parseInt(process.env.JWT_TTL!);
 
 declare global {
   namespace Express {
@@ -27,24 +26,26 @@ export function requiresAuthentication(
   res: Response,
   next: NextFunction
 ) {
-  if (req.cookies) {
-    const jwtString = req.cookies[COOKIE_NAME!];
+  const jwtString = req.cookies?.[COOKIE_NAME];
 
-    if (jwtString) {
-      const payload = verify(jwtString, SECRET);
-      if (
-        typeof payload === "object" &&
-        payload.exp &&
-        payload.sub &&
-        validator.isMongoId(payload.sub)
-      ) {
-        req.profId = payload.sub;
-        req.role = payload.role || "guest";
-        next();
-        return;
-      }
-    }
+  if (!jwtString) {
+    return res.sendStatus(401); // Unauthorized
   }
+
+  try {
+    const payload = verify(jwtString, SECRET);
+
+    if (
+      typeof payload === "object" &&
+      payload.exp &&
+      payload.sub &&
+      validator.isMongoId(payload.sub)
+    ) {
+      req.profId = payload.sub;
+      req.role = payload.role || "guest";
+      return next();
+    }
+  } catch (err) {}
   res.sendStatus(401);
 }
 
@@ -60,7 +61,7 @@ export function optionalAuthentication(
 ) {
   const jwtString = req.cookies[COOKIE_NAME!];
   if (!jwtString) {
-    next();
+    return next();
   }
   try {
     const payload = verify(jwtString, SECRET);

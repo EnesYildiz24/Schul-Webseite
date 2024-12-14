@@ -3,6 +3,25 @@ import { createGebiet } from "../../src/services/GebietService";
 import "restmatcher"; // Stelle neue Jest-Matcher zur Verfügung
 import supertest from "supertest";
 import { createProf } from "../../src/services/ProfService";
+import { performAuthentication, supertestWithAuth } from "../supertestWithAuth";
+
+beforeAll(async () => {
+  const verwalter = await createProf({
+    name: "Admin",
+    campusID: "admin",
+    password: "xyzXYZ123!§xxx",
+    admin: true,
+  });
+  await performAuthentication("admin", "xyzXYZ123!§xxx");
+
+  await createGebiet({
+    name: "Web 2",
+    beschreibung: "MP",
+    public: true,
+    closed: false,
+    verwalter: verwalter.id!,
+  });
+});
 
 test("POST, fehlende name", async () => {
   // act:
@@ -13,7 +32,7 @@ test("POST, fehlende name", async () => {
     admin: false,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.post("/api/gebiet").send({
     beschreibung: "AP",
     public: false,
@@ -59,7 +78,7 @@ test("PUT, Konsistenz ID in Parameter und Body", async () => {
   });
 
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.put(`/api/gebiet/${gebRes.id}`).send({
     id: anderergebRes.id, // andere ID als in Parameter
     name: "Web 2",
@@ -85,7 +104,7 @@ test("DELETE, keine MongoID", async () => {
   // nichts zu tun
 
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.delete(`/api/gebiet/keineMongoID`).send();
 
   // assert:
@@ -107,7 +126,7 @@ test("POST, einfacher Positivtest", async () => {
     admin: false,
   });
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.post("/api/gebiet").send({
     name: "",
     beschreibung: "APP",

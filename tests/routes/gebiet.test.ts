@@ -7,6 +7,25 @@ import {
 } from "../../src/services/GebietService";
 import supertest from "supertest";
 import { createThema } from "../../src/services/ThemaService";
+import { performAuthentication, supertestWithAuth } from "../supertestWithAuth";
+
+beforeAll(async () => {
+  const verwalter = await createProf({
+    name: "Admin",
+    campusID: "admin",
+    password: "xyzXYZ123!§xxx",
+    admin: true,
+  });
+  await performAuthentication("admin", "xyzXYZ123!§xxx");
+
+  await createGebiet({
+    name: "Web 2",
+    beschreibung: "MP",
+    public: true,
+    closed: false,
+    verwalter: verwalter.id!,
+  });
+});
 
 test("GET /ALL, einfacher Positivtest gebiet", async () => {
   // arrange:
@@ -25,10 +44,10 @@ test("GET /ALL, einfacher Positivtest gebiet", async () => {
     verwalter: verwalter.id!,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.get(`/api/gebiet/alle`).send();
   expect(response.status).toBe(200);
-  expect(response.body.length).toBe(1);
+  expect(response.body.length).toBe(2);
   const gebiete = await getAlleGebiete();
   expect(gebiete.some((p) => p.id === gebRes.id)).toBe(true);
 });
@@ -41,7 +60,7 @@ test("POST, einfacher Positivtest gebiet", async () => {
     password: "abcABC123!§",
   });
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.post("/api/gebiet").send({
     name: "Web 2",
     beschreibung: "MP",
@@ -71,7 +90,7 @@ test("POST, einfacher Positivtest gebiet", async () => {
     admin: false,
     password: "abcABC123!§",
   });
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.post("/api/gebiet").send({});
 
   expect(response.status).toBe(400);
@@ -93,7 +112,7 @@ test("GET, einfacher Positivtest gebiet", async () => {
     verwalter: verwalter.id!,
   });
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.get(`/api/gebiet/${gebRes.id}`).send();
   // assert:
   // Prüfe Response
@@ -125,7 +144,7 @@ test("GET themen, einfacher Negativtest gebiet", async () => {
     verwalter: verwalter.id!,
   });
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.get(`/api/gebiet/${gebRes.id}/themen`).send();
   // assert:
   // Prüfe Response
@@ -148,7 +167,7 @@ test("GET themen, einfacher Negativtest gebiet", async () => {
     verwalter: verwalter.id!,
   });
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee
     .get(`/api/gebiet/${"123456789012345678901234"}/themen`)
     .send();
@@ -158,7 +177,7 @@ test("GET themen, einfacher Negativtest gebiet", async () => {
 });
 
 test("GET themen, einfacher validation Negativtest gebiet ", async () => {
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.get(`/api/gebiet/${undefined}/themen`).send();
   expect(response.status).toBe(400);
 });
@@ -188,7 +207,7 @@ test("GET themen, einfacher PositvTest gebiet", async () => {
     gebiet: gebRes.id!,
   });
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.get(`/api/gebiet/${gebRes.id}/themen`).send();
   // assert:
   // Prüfe Response
@@ -201,7 +220,7 @@ test("GET themen, einfacher PositvTest gebiet", async () => {
 });
 
 test("GET themen, einfacher PositvTest gebiet leerer array kein fehler", async () => {
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.get(`/api/gebiet/alle`).send();
 
   expect(response.status).toBe(200);
@@ -209,7 +228,7 @@ test("GET themen, einfacher PositvTest gebiet leerer array kein fehler", async (
 });
 
 test("GET, einfacher NegativTest gebiet not defined", async () => {
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.get(`/api/gebiet/${undefined}`).send();
 
   expect(response.status).toBe(400);
@@ -233,7 +252,7 @@ test("PUT, einfacher Positivtest gebiet", async () => {
     anzahlThemen: 0,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.put(`/api/gebiet/${gebRes.id}`).send({
     id: gebRes.id,
     name: "Web 3",
@@ -275,7 +294,7 @@ test("PUT /alle, einfacher NegativerTest gebiet", async () => {
     verwalter: verwalter.id!,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.put(`/api/gebiet/alle`).send({
     id: "alle",
     name: "Web 3",
@@ -304,7 +323,7 @@ test("PUT /alle, einfacher NegativerTest gebiet unvollständig", async () => {
     verwalter: verwalter.id!,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.put(`/api/gebiet/${gebRes.id}`).send({
     id: gebRes.id,
     name: "",
@@ -333,7 +352,7 @@ test("PUT, einfacher NegativTest erfundene gebietID", async () => {
     verwalter: verwalter.id!,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.put(`/api/gebiet/${gebRes.id}`).send({
     id: "erfunde id",
     name: "Web 3",
@@ -362,17 +381,19 @@ test("PUT, einfacher NegativTest erfundene gebietID", async () => {
     verwalter: verwalter.id!,
   });
 
-  const testee = supertest(app);
-  const response = await testee.put(`/api/gebiet/${"123456789012345678901234"}`).send({
-    id: "123456789012345678901234",
-    name: "Web 3",
-    beschreibung: "AP",
-    public: false,
-    closed: false,
-    verwalter: verwalter.id,
-    verwalterName: verwalter.name,
-    anzahlThemen: 0,
-  });
+  const testee = supertestWithAuth(app);
+  const response = await testee
+    .put(`/api/gebiet/${"123456789012345678901234"}`)
+    .send({
+      id: "123456789012345678901234",
+      name: "Web 3",
+      beschreibung: "AP",
+      public: false,
+      closed: false,
+      verwalter: verwalter.id,
+      verwalterName: verwalter.name,
+      anzahlThemen: 0,
+    });
 
   expect(response.status).toBe(404);
 });
@@ -394,7 +415,7 @@ test("DELETE, einfacher Positivtest gebiet", async () => {
     verwalter: verwalter.id!,
   });
   //Act
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.delete(`/api/gebiet/${gebRes.id}`).send();
 
   //Assert
@@ -419,7 +440,7 @@ test("DELETE /alle, einfacher NegativTest gebiet", async () => {
     verwalter: verwalter.id!,
   });
   //Act
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.delete(`/api/gebiet/alle`).send();
 
   //Assert
@@ -444,7 +465,7 @@ test("DELETE, Gebiet existiert", async () => {
     anzahlThemen: 0,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
 
   const response = await testee.delete(`/api/gebiet/${gebRes.id}`);
 
@@ -455,7 +476,7 @@ test("DELETE, Gebiet existiert", async () => {
 });
 
 test("DELETE, einfacher NegativTest gebiet no exist", async () => {
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee
     .delete(`/api/gebiet/${"123456789012345678901234"}`)
     .send();

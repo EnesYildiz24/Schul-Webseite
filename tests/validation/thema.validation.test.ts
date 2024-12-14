@@ -4,6 +4,33 @@ import { createProf } from "../../src/services/ProfService";
 import "restmatcher"; // Stelle neue Jest-Matcher zur Verfügung
 import supertest from "supertest";
 import { createThema } from "../../src/services/ThemaService";
+import { performAuthentication, supertestWithAuth } from "../supertestWithAuth";
+beforeAll(async () => {
+  const verwalter = await createProf({
+    name: "Admin",
+    campusID: "admin",
+    password: "xyzXYZ123!§xxx",
+    admin: true,
+  });
+  await performAuthentication("admin", "xyzXYZ123!§xxx");
+
+  const gebiet = await createGebiet({
+    name: "Web 2",
+    beschreibung: "MP",
+    public: true,
+    closed: false,
+    verwalter: verwalter.id!,
+  });
+
+  await createThema({
+    titel: "routes",
+    beschreibung: "aufgabe 4",
+    abschluss: "bsc",
+    status: "offen",
+    betreuer: verwalter.id!,
+    gebiet: gebiet.id!,
+  });
+});
 
 test("POST, fehlende CampusID", async () => {
   // act:
@@ -23,7 +50,7 @@ test("POST, fehlende CampusID", async () => {
     anzahlThemen: 0,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.post("/api/thema").send({
     beschreibung: "aufgabe 5",
     abschluss: "msc",
@@ -80,7 +107,7 @@ test("PUT, Konsistenz ID in Parameter und Body", async () => {
   })
 
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.put(`/api/prof/${profRes.id}`).send({
     id: thema.id,
     titel: "",
@@ -106,7 +133,7 @@ test("DELETE, keine MongoID", async () => {
   // nichts zu tun
 
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.delete(`/api/thema/keineMongoID`).send();
 
   // assert:
@@ -147,7 +174,7 @@ test("POST, einfacher Positivtest", async () => {
   })
 
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.post("/api/thema").send({
     id: thema.id,
     titel: "",
@@ -185,7 +212,7 @@ test("POST, einfacher NegativTest closed thema true", async () => {
   });
 
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.post("/api/thema").send({
     titel: "hey",
     beschreibung: "aufgabe 5",

@@ -2,13 +2,24 @@ import app from "../../src/app";
 import { ProfResource } from "../../src/Resources";
 import { createProf, getAlleProfs } from "../../src/services/ProfService";
 import supertest from "supertest";
+import { performAuthentication, supertestWithAuth } from "../supertestWithAuth";
+
+beforeAll(async () => {
+  await createProf({
+    name: "Admin",
+    campusID: "admin",
+    password: "xyzXYZ123!§xxx",
+    admin: true,
+  });
+  await performAuthentication("admin", "xyzXYZ123!§xxx");
+});
 
 test("POST, einfacher Positivtest", async () => {
   // arrange:
   // nichts zu tun
 
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.post("/api/prof").send({
     name: "Mein Prof",
     campusID: "MP",
@@ -18,6 +29,7 @@ test("POST, einfacher Positivtest", async () => {
 
   // assert:
   // Prüfe Response
+  
   expect(response.status).toBe(201);
   expect(response.body.name).toBe("Mein Prof");
   expect(response.body.campusID).toBe("MP");
@@ -34,7 +46,7 @@ test("POST, einfacher (Negativtest) positiv", async () => {
   // nichts zu tun
 
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.post("/api/prof").send({
     name: "pilgrim",
     password: "abcABC123!§",
@@ -53,7 +65,7 @@ test("POST, einfacher NegativTest", async () => {
   // nichts zu tun
 
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.post("/api/prof").send();
 
   // assert:
@@ -72,10 +84,11 @@ test("GET /ALL, einfacher Positivtest", async () => {
     campusID: "MP",
     password: "abcABC123!§",
     admin: true,
+    titel: "dmw"
   });
 
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.get(`/api/prof/alle`).send();
 
   // assert:
@@ -99,7 +112,7 @@ test("PUT, einfacher Positivtest", async () => {
   });
 
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.put(`/api/prof/${profRes.id}`).send({
     id: profRes.id,
     name: "Anderer Prof",
@@ -134,7 +147,7 @@ test("PUT, einfacher Negativtest erfundene id", async () => {
     admin: false,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.put(`/api/prof/${"123456789012345678901234"}`).send({
     id: "123456789012345678901234",
     name: "Anderer Prof",
@@ -154,7 +167,7 @@ test("PUT, einfacher NegativTest eingaben unvollständig", async () => {
     admin: false,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.put(`/api/prof/${profRes.id}`).send({
     id: profRes.id,
     name: "Anderer Prof",
@@ -174,7 +187,7 @@ test("PUT, einfacher NegativTest not same id", async () => {
   });
 
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.put(`/api/prof/${profRes.id}`).send({
     id: "123456789012345678901234",
     name: "Anderer Prof",
@@ -186,7 +199,7 @@ test("PUT, einfacher NegativTest not same id", async () => {
 });
 
 test("PUT, einfacher Negativertest alle", async () => {
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.put(`/api/prof/alle`).send({
     id: "alle",
     name: "Anderer Prof",
@@ -207,7 +220,7 @@ test("DELETE, einfacher Positivtest", async () => {
   });
 
   // act:
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.delete(`/api/prof/${profRes.id}`).send();
 
   // assert:
@@ -225,7 +238,7 @@ test("DELETE, einfacher NegativTest alle", async () => {
     admin: false,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.delete(`/api/prof/alle`).send();
 
   expect(response.status).toBe(400);
@@ -239,7 +252,7 @@ test("DELETE, einfacher Positivtest", async () => {
     admin: false,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee
     .delete(`/api/prof/${"123456789012345678901234"}`)
     .send();

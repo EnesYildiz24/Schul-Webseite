@@ -7,16 +7,21 @@ import {
   updateProf,
 } from "../services/ProfService";
 import { body, matchedData, param, validationResult } from "express-validator";
+import {
+  optionalAuthentication,
+  requiresAuthentication,
+} from "./authentication";
 
 export const profRouter = express.Router();
 
-profRouter.get("/alle", async (_req, res) => {
+profRouter.get("/alle", optionalAuthentication, async (_req, res) => {
   const profs = await getAlleProfs();
   res.send(profs); // Default Status 200
 });
 
 profRouter.post(
   "/",
+  requiresAuthentication,
   body("name").isString().isLength({ min: 1, max: 100 }),
   body("titel").optional().isString().isLength({ min: 1, max: 100 }),
   body("campusID").isString().isLength({ min: 1 }),
@@ -39,6 +44,7 @@ profRouter.post(
 
 profRouter.put(
   "/:id",
+  requiresAuthentication,
   param("id").isMongoId(),
   body("id").isMongoId(),
   body("name").isString().isLength({ min: 1, max: 100 }),
@@ -92,22 +98,27 @@ profRouter.put(
   }
 );
 
-profRouter.delete("/:id", param("id").isMongoId(), async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  try {
-    const profId = req.params!.id;
-    const profExists = (await getAlleProfs()).find(
-      (prof) => prof.id === profId
-    );
-    if (!profExists) {
-      return res.sendStatus(404);
+profRouter.delete(
+  "/:id",
+  requiresAuthentication,
+  param("id").isMongoId(),
+  async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-    await deleteProf(profId);
-    res.sendStatus(204);
-  } catch (err) {
-    res.sendStatus(404); // vermutlich nicht gefunden, in nächsten Aufgabenblättern genauer behandeln
+    try {
+      const profId = req.params!.id;
+      const profExists = (await getAlleProfs()).find(
+        (prof) => prof.id === profId
+      );
+      if (!profExists) {
+        return res.sendStatus(404);
+      }
+      await deleteProf(profId);
+      res.sendStatus(204);
+    } catch (err) {
+      res.sendStatus(404); // vermutlich nicht gefunden, in nächsten Aufgabenblättern genauer behandeln
+    }
   }
-});
+);

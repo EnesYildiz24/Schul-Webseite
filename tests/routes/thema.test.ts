@@ -8,9 +8,34 @@ import {
   updateThema,
 } from "../../src/services/ThemaService";
 import supertest from "supertest";
+import { performAuthentication, supertestWithAuth } from "../supertestWithAuth";
 
-//TODO eins fehlt
+beforeAll(async () => {
+  const verwalter = await createProf({
+    name: "Admin",
+    campusID: "admin",
+    password: "xyzXYZ123!§xxx",
+    admin: true,
+  });
+  await performAuthentication("admin", "xyzXYZ123!§xxx");
 
+  const gebiet = await createGebiet({
+    name: "Web 2",
+    beschreibung: "MP",
+    public: true,
+    closed: false,
+    verwalter: verwalter.id!,
+  });
+
+  await createThema({
+    titel: "routes",
+    beschreibung: "aufgabe 4",
+    abschluss: "bsc",
+    status: "offen",
+    betreuer: verwalter.id!,
+    gebiet: gebiet.id!,
+  });
+});
 test("GET / einfacher Positivtest thema", async () => {
   // Arrange
   const verwalter = await createProf({
@@ -38,7 +63,7 @@ test("GET / einfacher Positivtest thema", async () => {
   });
 
   // Act
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.get(`/api/thema/${thema.id}`).send();
 
   // Assert
@@ -51,7 +76,7 @@ test("GET / einfacher Positivtest thema", async () => {
 });
 
 test("GET / einfacher  Negativ test erfundene id thema", async () => {
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee
     .get(`/api/thema/${"123456789011111111111111"}`)
     .send();
@@ -61,7 +86,7 @@ test("GET / einfacher  Negativ test erfundene id thema", async () => {
 });
 
 test("GET / einfacher Negativ test undefined thema", async () => {
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.get(`/api/thema/${undefined}`).send();
 
   expect(response.status).toBe(400);
@@ -83,7 +108,7 @@ test("POST, einfacher Positivtest thema", async () => {
     verwalter: verwalter.id!,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.post("/api/thema").send({
     titel: "routes",
     beschreibung: "aufgabe 4",
@@ -123,7 +148,7 @@ test("POST, einfacher Positivtest thema", async () => {
     verwalter: verwalter.id!,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.post("/api/thema").send({
     titel: undefined,
     beschreibung: "aufgabe 4",
@@ -137,7 +162,7 @@ test("POST, einfacher Positivtest thema", async () => {
 });
 
 test("POST, einfacher NegativTest kein thema", async () => {
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.post("/api/thema").send({});
   expect(response.status).toBe(400);
 });
@@ -167,7 +192,7 @@ test("PUT, einfacher Positivtest thema", async () => {
     gebiet: gebiet.id!,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.put(`/api/thema/${thema.id}`).send({
     id: thema.id,
     titel: "REACT",
@@ -218,7 +243,7 @@ test("PUT / alle, einfacher NegativTest thema", async () => {
     gebiet: gebiet.id!,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.put(`/api/thema/alle`).send({
     id: "alle",
     titel: "REACT",
@@ -258,7 +283,7 @@ test("PUT / alle, einfacher NegativTest thema", async () => {
     gebiet: gebiet.id!,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.put(`/api/thema/${"111111111111111111111111"}`).send({
     id: "111111111111111111111111",
     titel: "REACT",
@@ -298,7 +323,7 @@ test("PUT / einfacher NegativTest kein update inhalt thema", async () => {
     gebiet: gebiet.id!,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.put(`/api/thema/${thema.id}`).send({});
 
   expect(response.status).toBe(400);
@@ -329,7 +354,7 @@ test("PUT , einfacher NegativTest thema undvollständige änderung", async () =>
     gebiet: gebiet.id!,
   });
 
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.put(`/api/thema/${thema.id}`).send({
     id: thema.id,
     titel: "",
@@ -369,7 +394,7 @@ test("DELETE, einfacher Positivtest thema", async () => {
     gebiet: gebiet.id!,
   });
   //Act
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.delete(`/api/thema/${thema.id}`).send();
 
   //Assert
@@ -405,7 +430,7 @@ test("DELETE/alle, einfacher NegativTest thema", async () => {
     gebiet: gebiet.id!,
   });
   //Act
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.delete(`/api/thema/alle`).send();
 
   //Assert
@@ -414,7 +439,7 @@ test("DELETE/alle, einfacher NegativTest thema", async () => {
 
 test("DELETE, einfacher NegativTest undefined id thema", async () => {
   //Act
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.delete(`/api/thema/${undefined}`).send();
 
   //Assert
@@ -423,7 +448,7 @@ test("DELETE, einfacher NegativTest undefined id thema", async () => {
 
 test("DELETE, einfacher NegativTest erfundene id thema", async () => {
   //Act
-  const testee = supertest(app);
+  const testee = supertestWithAuth(app);
   const response = await testee.delete(`/api/thema/${"123456789012345678901234"}`).send();
 
   //Assert

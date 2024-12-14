@@ -4,12 +4,14 @@ import { themenRouter } from "./routes/thema";
 import { gebietRouter } from "./routes/gebiet";
 import { profRouter } from "./routes/prof";
 import { loginRouter } from "./routes/login";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
 // Middleware:
 
 // Wozu wird diese Middleware benötigt?
+app.use(cookieParser());
 app.use(express.json());
 
 /*
@@ -24,5 +26,6 @@ app.use("/api/thema", themenRouter);
 app.use("/api/gebiet", gebietRouter);
 app.use("/api/prof", profRouter);
 app.use("/api/login", loginRouter); 
+
 
 export default app;

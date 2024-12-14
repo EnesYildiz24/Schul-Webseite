@@ -9,37 +9,47 @@ import {
 } from "../services/GebietService";
 import { getAlleThemen } from "../services/ThemaService";
 import { body, matchedData, param, validationResult } from "express-validator";
+import {
+  optionalAuthentication,
+  requiresAuthentication,
+} from "./authentication";
 
 export const gebietRouter = express.Router();
 
-gebietRouter.get("/alle", async (_req, res, next) => {
+gebietRouter.get("/alle", optionalAuthentication, async (_req, res, next) => {
   const gebiete = await getAlleGebiete();
   res.send(gebiete);
 });
 
-gebietRouter.get("/:id", param("id").isMongoId(), async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  const gebietId = req.params!.id;
-  try {
-    const gebiet = await getGebiet(gebietId);
-    if (!gebiet) {
-      return res.status(404).json({
-        errors: [
-          { msg: "Gebiet nicht gefunden", path: "id", value: req.params!.id },
-        ],
-      });
+gebietRouter.get(
+  "/:id",
+  optionalAuthentication,
+  param("id").isMongoId(),
+  async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-    res.status(200).send(gebiet);
-  } catch (err) {
-    res.sendStatus(404);
+    const gebietId = req.params!.id;
+    try {
+      const gebiet = await getGebiet(gebietId);
+      if (!gebiet) {
+        return res.status(404).json({
+          errors: [
+            { msg: "Gebiet nicht gefunden", path: "id", value: req.params!.id },
+          ],
+        });
+      }
+      res.status(200).send(gebiet);
+    } catch (err) {
+      res.sendStatus(404);
+    }
   }
-});
+);
 
 gebietRouter.get(
   "/:id/themen",
+  optionalAuthentication,
   param("id").isMongoId(),
   async (req, res, next) => {
     const errors = validationResult(req);
@@ -69,6 +79,7 @@ gebietRouter.get(
 
 gebietRouter.post(
   "/",
+  requiresAuthentication,
   body("name").isString().isLength({ min: 1, max: 100 }),
   body("beschreibung").optional().isString().isLength({ min: 1, max: 1000 }),
   body("public").optional().isBoolean(),
@@ -93,6 +104,7 @@ gebietRouter.post(
 
 gebietRouter.put(
   "/:id",
+  requiresAuthentication,
   param("id").isMongoId(),
   body("id").isMongoId(),
   body("name").isString().isLength({ min: 1, max: 100 }),
@@ -131,17 +143,15 @@ gebietRouter.put(
       const gebietData = matchedData(req) as GebietResource;
       const updatedGebietResource = await updateGebiet(gebietData);
       if (!updatedGebietResource) {
-        return res
-          .status(404)
-          .json({
-            errors: [
-              {
-                msg: "Gebiet nicht gefunden",
-                path: "id",
-                value: req.params!.id,
-              },
-            ],
-          });
+        return res.status(404).json({
+          errors: [
+            {
+              msg: "Gebiet nicht gefunden",
+              path: "id",
+              value: req.params!.id,
+            },
+          ],
+        });
       }
       res.status(200).json(updatedGebietResource);
     } catch (err) {
@@ -150,16 +160,21 @@ gebietRouter.put(
   }
 );
 
-gebietRouter.delete("/:id", param("id").isMongoId(), async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+gebietRouter.delete(
+  "/:id",
+  requiresAuthentication,
+  param("id").isMongoId(),
+  async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    try {
+      const gebietID = req.params!.id;
+      await deleteGebiet(gebietID);
+      res.sendStatus(204);
+    } catch (err) {
+      res.sendStatus(404); // vermutlich nicht gefunden, in nächsten Aufgabenblättern genauer behandeln
+    }
   }
-  try {
-    const gebietID = req.params!.id;
-    await deleteGebiet(gebietID);
-    res.sendStatus(204);
-  } catch (err) {
-    res.sendStatus(404); // vermutlich nicht gefunden, in nächsten Aufgabenblättern genauer behandeln
-  }
-});
+);

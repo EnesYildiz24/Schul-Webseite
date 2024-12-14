@@ -1,3 +1,4 @@
+import { title } from "process";
 import app from "../../src/app";
 import { createProf, getAlleProfs } from "../../src/services/ProfService";
 import { performAuthentication, supertestWithAuth } from "../supertestWithAuth";
@@ -7,7 +8,7 @@ beforeAll(async () => {
     name: "Admin",
     campusID: "admin",
     password: "xyzXYZ123!§xxx",
-    admin: true,
+    admin: false,
   });
   await performAuthentication("admin", "xyzXYZ123!§xxx");
 });
@@ -55,7 +56,7 @@ test("PUT, einfacher Positivtest", async () => {
     name: "Anderer Prof",
     campusID: "AP",
     admin: false,
-    titel: "bla", //TODO: titel erforderlich oder nicht????
+    titel:"ist halt wegen validierung notwendig"
   });
 
   // assert:

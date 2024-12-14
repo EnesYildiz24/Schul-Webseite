@@ -8,25 +8,35 @@ import {
   updateThema,
 } from "../services/ThemaService";
 import { body, matchedData, param, validationResult } from "express-validator";
+import {
+  optionalAuthentication,
+  requiresAuthentication,
+} from "./authentication";
 
 export const themenRouter = express.Router();
 
-themenRouter.get("/:id", param("id").isMongoId(), async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+themenRouter.get(
+  "/:id",
+  optionalAuthentication,
+  param("id").isMongoId(),
+  async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    try {
+      const themenId = req.params!.id;
+      const thema = await getThema(themenId);
+      return res.status(200).send(thema);
+    } catch (err) {
+      next(404);
+    }
   }
-  try {
-    const themenId = req.params!.id;
-    const thema = await getThema(themenId);
-    return res.status(200).send(thema);
-  } catch (err) {
-    next(404);
-  }
-});
+);
 
 themenRouter.post(
   "/",
+  requiresAuthentication,
   body("titel").isString().isLength({ min: 1, max: 100 }),
   body("beschreibung").isString().isLength({ min: 1, max: 1000 }),
   body("abschluss").optional().isString().isLength({ min: 1, max: 100 }),
@@ -52,6 +62,7 @@ themenRouter.post(
 
 themenRouter.put(
   "/:id",
+  requiresAuthentication,
   param("id").isMongoId(),
   body("id").isMongoId(),
   body("titel").isString().isLength({ min: 1, max: 100 }),
@@ -107,16 +118,21 @@ themenRouter.put(
   }
 );
 
-themenRouter.delete("/:id", param("id").isMongoId(), async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+themenRouter.delete(
+  "/:id",
+  requiresAuthentication,
+  param("id").isMongoId(),
+  async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    try {
+      const themaID = req.params!.id;
+      await deleteThema(themaID);
+      res.sendStatus(204);
+    } catch (err) {
+      res.sendStatus(404); // vermutlich nicht gefunden, in nächsten Aufgabenblättern genauer behandeln
+    }
   }
-  try {
-    const themaID = req.params!.id;
-    await deleteThema(themaID);
-    res.sendStatus(204);
-  } catch (err) {
-    res.sendStatus(404); // vermutlich nicht gefunden, in nächsten Aufgabenblättern genauer behandeln
-  }
-});
+);

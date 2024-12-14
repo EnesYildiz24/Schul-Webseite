@@ -61,14 +61,14 @@ loginRouter.get("/", (req, res) => {
 
   if (!token) {
     res.clearCookie(COOKIE_NAME);
-    return res.json(false);
+    return res.status(200).json(false);
   }
   try {
     const payload = verifyJWT(token);
     res.json(payload);
   } catch (err) {
     res.clearCookie(COOKIE_NAME);
-    res.json(false);
+    res.status(200).json(false);
   }
 });
 

@@ -8,7 +8,7 @@ beforeAll(async () => {
     name: "Admin",
     campusID: "admin",
     password: "xyzXYZ123!§xxx",
-    admin: false,
+    admin: true, //von der aufgaben stellung so verlangt
   });
   await performAuthentication("admin", "xyzXYZ123!§xxx");
 });
@@ -25,7 +25,6 @@ test("POST, einfacher Positivtest", async () => {
     password: "abcABC123!§",
     admin: false,
   });
-
   // assert:
   // Prüfe Response
   expect(response.status).toBe(201);

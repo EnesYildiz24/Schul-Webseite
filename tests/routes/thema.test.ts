@@ -376,6 +376,7 @@ test("DELETE, einfacher Positivtest thema", async () => {
     admin: false,
     password: "abcABC123!§",
   });
+  await performAuthentication("MP", "abcABC123!§");
 
   const gebiet = await createGebiet({
     name: "Web 2",
@@ -412,6 +413,7 @@ test("DELETE/alle, einfacher NegativTest thema", async () => {
     admin: false,
     password: "abcABC123!§",
   });
+  await performAuthentication("MP", "abcABC123!§");
 
   const gebiet = await createGebiet({
     name: "Web 2",

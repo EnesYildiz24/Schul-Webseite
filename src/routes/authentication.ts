@@ -34,11 +34,11 @@ export function requiresAuthentication(
 
   try {
     const payload = verify(jwtString, SECRET);
-
     if (
       typeof payload === "object" &&
       payload.exp &&
       payload.sub &&
+      
       validator.isMongoId(payload.sub)
     ) {
       req.profId = payload.sub;

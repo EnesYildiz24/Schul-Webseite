@@ -1,5 +1,5 @@
 import express from "express";
-import { GebietResource } from "../Resources";
+import { GebietResource, ProfResource } from "../Resources";
 import {
   createGebiet,
   deleteGebiet,
@@ -40,6 +40,10 @@ gebietRouter.get(
           ],
         });
       }
+      if (!gebiet.public && req.profId !== gebiet.verwalter!) {
+        return res.sendStatus(403);
+      }
+
       res.status(200).send(gebiet);
     } catch (err) {
       res.sendStatus(404);
@@ -92,8 +96,11 @@ gebietRouter.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+    const gebietData = matchedData(req) as GebietResource;
+    if (req.profId !== gebietData.verwalter) {
+      return res.sendStatus(403);
+    }
     try {
-      const gebietData = matchedData(req) as GebietResource;
       const createdgebietResource = await createGebiet(gebietData);
       res.status(201).send(createdgebietResource);
     } catch (err) {
@@ -170,8 +177,11 @@ gebietRouter.delete(
       return res.status(400).json({ errors: errors.array() });
     }
     try {
-      const gebietID = req.params!.id;
-      await deleteGebiet(gebietID);
+      const gebietID = await getGebiet(req.params!.id);
+      if (req.profId !== gebietID.verwalter!) {
+        return res.sendStatus(403);
+      }
+      await deleteGebiet(req.params.id);
       res.sendStatus(204);
     } catch (err) {
       res.sendStatus(404); // vermutlich nicht gefunden, in nächsten Aufgabenblättern genauer behandeln

@@ -12,6 +12,7 @@ import {
   optionalAuthentication,
   requiresAuthentication,
 } from "./authentication";
+import { getGebiet } from "../services/GebietService";
 
 export const themenRouter = express.Router();
 
@@ -27,6 +28,14 @@ themenRouter.get(
     try {
       const themenId = req.params!.id;
       const thema = await getThema(themenId);
+      const gebiet = await getGebiet(thema.gebiet);
+      if (
+        !gebiet.public &&
+        req.profId !== thema.betreuer &&
+        req.profId !== gebiet.verwalter!
+      ) {
+        return res.sendStatus(403);
+      }
       return res.status(200).send(thema);
     } catch (err) {
       next(404);
@@ -52,6 +61,10 @@ themenRouter.post(
     }
     try {
       const themaResource = matchedData(req) as ThemaResource;
+      const gebiet = await getGebiet(themaResource.gebiet);
+      if (!gebiet.public && req.profId !== gebiet.verwalter!) {
+        return res.sendStatus(403);
+      }
       const createdthemaResource = await createThema(themaResource);
       return res.status(201).send(createdthemaResource);
     } catch (err) {
@@ -129,6 +142,11 @@ themenRouter.delete(
     }
     try {
       const themaID = req.params!.id;
+      const thema = await getThema(themaID);
+      const gebiet = await getGebiet(thema.gebiet);
+      if (req.profId !== thema.betreuer && req.profId !== gebiet.verwalter!) {
+        return res.sendStatus(403);
+      }
       await deleteThema(themaID);
       res.sendStatus(204);
     } catch (err) {

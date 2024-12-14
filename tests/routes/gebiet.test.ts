@@ -53,12 +53,15 @@ test("GET /ALL, einfacher Positivtest gebiet", async () => {
 });
 
 test("POST, einfacher Positivtest gebiet", async () => {
-  const verwalter = await createProf({
+  const verwalter1 = await createProf({
     name: "Mein Prof",
-    campusID: "MP",
+    campusID: "mp",
     admin: false,
     password: "abcABC123!§",
   });
+
+  await performAuthentication("mp", "abcABC123!§");
+
   // act:
   const testee = supertestWithAuth(app);
   const response = await testee.post("/api/gebiet").send({
@@ -66,7 +69,7 @@ test("POST, einfacher Positivtest gebiet", async () => {
     beschreibung: "MP",
     public: true,
     closed: false,
-    verwalter: verwalter.id,
+    verwalter: verwalter1.id,
   });
 
   // assert:
@@ -406,6 +409,7 @@ test("DELETE, einfacher Positivtest gebiet", async () => {
     admin: false,
     password: "abcABC123!§",
   });
+  await performAuthentication("MP", "abcABC123!§");
 
   const gebRes = await createGebiet({
     name: "Web 2",
@@ -454,6 +458,7 @@ test("DELETE, Gebiet existiert", async () => {
     password: "abcABC123!§",
     admin: true,
   });
+  await performAuthentication("MP", "abcABC123!§");
 
   const gebRes = await createGebiet({
     name: "Testgebiet",

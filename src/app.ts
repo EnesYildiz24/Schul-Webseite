@@ -5,6 +5,7 @@ import { gebietRouter } from "./routes/gebiet";
 import { profRouter } from "./routes/prof";
 import { loginRouter } from "./routes/login";
 import cookieParser from "cookie-parser";
+import { configureCORS } from "./configCORS";
 
 const app = express();
 
@@ -12,6 +13,7 @@ const app = express();
 
 // Wozu wird diese Middleware benötigt?
 app.use(cookieParser());
+// configureCORS(app);
 app.use(express.json());
 
 /*

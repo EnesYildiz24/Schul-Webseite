@@ -224,6 +224,6 @@ test("POST, einfacher NegativTest closed thema true", async () => {
   });
 
   // Prüfe Datenbank
-  expect(response.statusCode).toBe(404);
+  expect(response.statusCode).toBe(403);
 });
 

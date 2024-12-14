@@ -17,7 +17,7 @@ export async function verifyPasswordAndCreateJWT(
     return undefined;
   }
   const payload: JwtPayload = {
-    sub: logger.id ,
+    sub: logger.id as string,
     role: logger.role as "a" | "u",
   };
   const jwtString = sign(payload, secret, {
@@ -42,9 +42,9 @@ export function verifyJWT(jwtString: string | undefined): LoginResource {
       algorithms: ["HS256"],
     }) as JwtPayload;
 
-    const userId = payload.sub;
+    const userId = payload.sub as string;
     const role = payload.role as "a" | "u";
-    const exp = payload.exp;
+    const exp = payload.exp as number;
 
     if (!userId || !exp || !role) {
       throw new JsonWebTokenError("Ungültiges JWT-Payload");

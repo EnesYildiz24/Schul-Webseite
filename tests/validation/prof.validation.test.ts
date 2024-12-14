@@ -9,7 +9,7 @@ beforeAll(async () => {
     name: "Admin",
     campusID: "admin",
     password: "xyzXYZ123!§xxx",
-    admin: false,
+    admin: true,
   });
   await performAuthentication("admin", "xyzXYZ123!§xxx");
 });

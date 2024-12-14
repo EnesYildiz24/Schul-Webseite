@@ -15,6 +15,9 @@ import {
 export const profRouter = express.Router();
 
 profRouter.get("/alle", optionalAuthentication, async (_req, res) => {
+  if (_req.role !== "a") {
+    return res.sendStatus(403); // Forbidden
+  }
   const profs = await getAlleProfs();
   res.send(profs); // Default Status 200
 });
@@ -28,6 +31,10 @@ profRouter.post(
   body("password").isStrongPassword().isLength({ min: 5 }),
   body("admin").isBoolean(),
   async (req, res, next) => {
+    if (req.role !== "a") {
+      return res.sendStatus(403);
+    }
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -53,6 +60,9 @@ profRouter.put(
   body("password").optional().isStrongPassword(),
   body("admin").isBoolean(),
   async (req, res, next) => {
+    if (req.role !== "a") {
+      return res.sendStatus(403);
+    }
     const errors = validationResult(req).array();
     if (req.params?.id !== req.body.id) {
       return res.status(400).json({
@@ -103,6 +113,9 @@ profRouter.delete(
   requiresAuthentication,
   param("id").isMongoId(),
   async (req, res, next) => {
+    if (req.role !== "a") {
+      return res.sendStatus(403); 
+    }
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -115,7 +128,11 @@ profRouter.delete(
       if (!profExists) {
         return res.sendStatus(404);
       }
+      if (req.params.id === req.profId) {
+        return res.sendStatus(403);
+      }
       await deleteProf(profId);
+
       res.sendStatus(204);
     } catch (err) {
       res.sendStatus(404); // vermutlich nicht gefunden, in nächsten Aufgabenblättern genauer behandeln

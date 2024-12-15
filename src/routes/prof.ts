@@ -14,7 +14,7 @@ import {
 
 export const profRouter = express.Router();
 
-profRouter.get("/alle", optionalAuthentication, async (_req, res) => {
+profRouter.get("/alle", requiresAuthentication, async (_req, res) => {
   if (_req.role !== "a") {
     return res.sendStatus(403); // Forbidden
   }

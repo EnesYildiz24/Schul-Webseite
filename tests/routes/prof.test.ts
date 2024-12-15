@@ -260,4 +260,3 @@ test("DELETE, einfacher Positivtest", async () => {
   expect(response.status).toBe(404);
 });
 
-// Test für GET /api/prof/alle können selbst geschrieben werden.

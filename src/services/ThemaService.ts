@@ -49,8 +49,8 @@ export async function getAlleThemen(
  * Falls kein Thema gefunden wurde, wird ein Fehler geworfen.
  */
 export async function getThema(id: string): Promise<ThemaResource> {
+  const alleThemen = await Thema.find();
   const thema = await Thema.findById(id).exec();
-
   if (!thema) {
     throw new Error("Thema nicht gefunden");
   }
@@ -80,7 +80,7 @@ export async function createThema(
     throw new Error("kein betreuer");
   }
   if (!themaResource.gebiet) {
-    throw new Error("kein betreuer");
+    throw new Error("kein gebiet");
   }
   const betreuerProf = await Prof.findById(themaResource.betreuer).exec();
   if (!betreuerProf) {

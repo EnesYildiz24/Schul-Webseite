@@ -40,6 +40,7 @@ themenRouter.get(
     } catch (err) {
       next(404);
     }
+    
   }
 );
 
@@ -52,7 +53,7 @@ themenRouter.post(
   body("status").optional().isString().isLength({ min: 1, max: 100 }),
   body("betreuer").isMongoId(),
   body("betreuerName").optional().isString().isLength({ min: 1, max: 100 }),
-  body("gebiet").isString().isLength({ min: 1, max: 100 }),
+  body("gebiet").isMongoId(),
 
   async (req, res, next) => {
     const errors = validationResult(req);

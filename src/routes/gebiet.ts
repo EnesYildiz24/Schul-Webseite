@@ -17,7 +17,8 @@ import {
 export const gebietRouter = express.Router();
 
 gebietRouter.get("/alle", optionalAuthentication, async (_req, res, next) => {
-  const gebiete = await getAlleGebiete();
+  const profId = _req.profId;
+  const gebiete = await getAlleGebiete(profId);
   res.send(gebiete);
 });
 
@@ -60,23 +61,14 @@ gebietRouter.get(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const gebietId = req.params!.id;
+
     try {
-      const themen = await getAlleThemen(gebietId);
-      if (!themen || themen.length === 0) {
-        res.status(404).json({
-          errors: [
-            {
-              msg: "Keine Themen gefunden",
-              path: "id",
-              value: req.params!.id,
-            },
-          ],
-        });
-      }
+      const gebietID = req.params!.id;
+      const themen = await getAlleThemen(gebietID);
       res.status(200).send(themen);
     } catch (err) {
-      res.sendStatus(404);
+      res.status(400);
+      next(err);
     }
   }
 );

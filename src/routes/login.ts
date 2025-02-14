@@ -10,9 +10,11 @@ export const loginRouter = express.Router();
 loginRouter.use(cookieParser());
 
 // hier ohne Fehlerbehandlung für die Demo
+const JWT_TTL=18000
 const COOKIE_NAME = "access_token";
 const SECRET = process.env.JWT_SECRET!;
-const TTL = parseInt(process.env.JWT_TTL!);
+//const TTL = parseInt(process.env.JWT_TTL!);
+const TTL = 18000; // 5 Stunden in Sekunden
 
 loginRouter.post(
   "/",
@@ -30,7 +32,7 @@ loginRouter.post(
     const loginResult = await login(campusID, password);
     if (!loginResult) {
       res.status(401).send("Login failed");
-      return
+      return;
     }
     const jwtString = sign(
       {
@@ -49,10 +51,13 @@ loginRouter.post(
       httpOnly: true,
       secure: true,
       sameSite: "none",
-      expires: new Date(Date.now() + TTL * 1000),
+      expires: new Date(Date.now() + TTL * 10000000),
     });
 
-    res.sendStatus(201);
+    res.status(201).json({
+      id: loginResult.id,
+      role: loginResult.role,
+    });
   }
 );
 
@@ -61,20 +66,19 @@ loginRouter.get("/", (req, res) => {
 
   if (!token) {
     res.clearCookie(COOKIE_NAME);
-    return res.status(200).json(false);
+    return res.status(401).json(false);
   }
   try {
     const payload = verifyJWT(token);
     res.json(payload);
   } catch (err) {
     res.clearCookie(COOKIE_NAME);
-    res.status(200).json(false);
+    res.status(401).json(false);
   }
 });
 
 loginRouter.delete("/", (req, res) => {
   res.clearCookie(COOKIE_NAME, {
-    //TODO: keine ahnung ob das nötig ist (Sicherheit)
     httpOnly: true,
     secure: true,
     sameSite: "none",

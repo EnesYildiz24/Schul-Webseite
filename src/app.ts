@@ -10,12 +10,11 @@ import { configureCORS } from "./configCORS";
 const app = express();
 
 // Middleware:
-
+configureCORS(app); 
 // Wozu wird diese Middleware benötigt?
 app.use(cookieParser());
 // configureCORS(app);
 app.use(express.json());
-
 /*
 Die Middleware wird benötigt, um eine eingehende HTTPS Anfrage zu parsen,
 die in der JSON Daten im Body enthalten sind. 

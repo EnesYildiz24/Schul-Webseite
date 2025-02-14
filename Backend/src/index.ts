@@ -11,7 +11,7 @@ import { readFile } from "fs/promises";
 import https from "https";
 
 async function setup() {
-  let mongodURI = process.env.DB_CONNECTION_STRING;
+  let mongodURI: string = process.env.DB_CONNECTION_STRING || "";
   if (!mongodURI) {
     logger.error(
       `Cannot start, no database configured. Set environment variable DB_CONNECTION_STRING. Use "memory" for MongoMemoryServer`

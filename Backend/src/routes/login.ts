@@ -10,11 +10,9 @@ export const loginRouter = express.Router();
 loginRouter.use(cookieParser());
 
 // hier ohne Fehlerbehandlung für die Demo
-const JWT_TTL=18000
 const COOKIE_NAME = "access_token";
 const SECRET = process.env.JWT_SECRET!;
-//const TTL = parseInt(process.env.JWT_TTL!);
-const TTL = 18000; // 5 Stunden in Sekunden
+const TTL = parseInt(process.env.JWT_TTL!);
 
 loginRouter.post(
   "/",
@@ -51,7 +49,7 @@ loginRouter.post(
       httpOnly: true,
       secure: true,
       sameSite: "none",
-      expires: new Date(Date.now() + TTL * 10000000),
+      expires: new Date(Date.now() + TTL * 1000),
     });
 
     res.status(201).json({

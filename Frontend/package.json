@@ -1,0 +1,52 @@
+{
+  "name": "we2.blatt11",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Web Engineering 2, Blatt 11",
+  "type": "module",
+  "scripts": {
+    "abgabe": "ziplocalgit zip -f abgabe_Blatt_11.zip",
+    "build": "tsc -b && vite build",
+    "clean": "rimraf dist coverage junit.xml abgabe*.zip all.log",
+    "dev": "vite",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "serve": "serve -s --ssl-cert cert/public.crt --ssl-key cert/private.key -p 3000 --no-port-switching dist",
+    "test": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 vitest run"
+  },
+  "dependencies": {
+    "bootstrap": "5.3.3",
+    "bootstrap-icons": "1.11.3",
+    "react": "18.3.1",
+    "react-bootstrap": "2.10.6",
+    "react-dom": "18.3.1",
+    "react-error-boundary": "4.1.2",
+    "react-router-dom": "7.0.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.16.0",
+    "@testing-library/jest-dom": "6.6.3",
+    "@testing-library/react": "16.1.0",
+    "@testing-library/user-event": "14.5.2",
+    "@types/node": "22.10.1",
+    "@types/react": "18.3.12",
+    "@types/react-bootstrap": "0.32.37",
+    "@types/react-dom": "18.3.1",
+    "@types/react-router-dom": "5.3.3",
+    "@vitejs/plugin-react": "4.3.4",
+    "@vitest/coverage-v8": "2.1.8",
+    "cross-env": "7.0.3",
+    "dotenv": "16.4.7",
+    "eslint": "9.16.0",
+    "eslint-plugin-react-hooks": "5.1.0",
+    "eslint-plugin-react-refresh": "0.4.16",
+    "globals": "15.13.0",
+    "jsdom": "25.0.1",
+    "serve": "^14.2.4",
+    "typescript": "5.7.2",
+    "typescript-eslint": "8.17.0",
+    "vite": "6.0.3",
+    "vitest": "2.1.8",
+    "ziplocalgit": "1.0.10"
+  }
+}

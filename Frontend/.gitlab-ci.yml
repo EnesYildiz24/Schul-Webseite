@@ -1,0 +1,20 @@
+# Template for node see:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Nodejs.gitlab-ci.yml
+# Coverage see:
+# https://gist.github.com/rishitells/3c4536131819cff4eba2c8ab5bbb4570
+
+image: node:20
+
+stages:
+  - test
+
+javascript:
+  stage: test
+  script:
+    - npm ci
+    - npm test
+  coverage: '/All files\s*|\s+([\d\.]+)\s*\|.*/'
+  artifacts:
+    reports:
+      junit:
+        - junit.xml

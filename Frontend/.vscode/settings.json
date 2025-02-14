@@ -1,0 +1,11 @@
+{
+    "typescript.preferences.importModuleSpecifier": "relative",
+    "vitest.nodeExecArgs": [
+        "--preserve-symlinks"
+    ],
+    "testing.automaticallyOpenTestResults": "neverOpen",
+    "github.copilot.editor.enableAutoCompletions": false,
+    "github.copilot.enable": {
+        "*": false
+    }
+}

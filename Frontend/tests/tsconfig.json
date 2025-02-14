@@ -1,0 +1,17 @@
+{ // Konfiguration von TypeScript für die Tests, die mit ts-jest ausgeführt werden.
+  "extends": "../tsconfig.node.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "noEmit": true,
+     /* Testing */
+     "types": [
+      "vitest/globals",
+      "@testing-library/jest-dom"
+    ],
+    "jsx": "react-jsx"
+  },
+  "include": [
+    "../src/**/*",
+    "./**/*"
+  ]
+}

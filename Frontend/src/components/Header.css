@@ -1,0 +1,11 @@
+@media (max-width: 999px) {
+  .login-button {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1000px) {
+  .logout-button {
+    display: inline-block !important;
+  }
+}
